@@ -11,9 +11,9 @@ cmake () {
     emcmake cmake "$@"
 }
 
-make () {
-    emmake make "$@"
-}
+# make () {
+#     emmake make "$@"
+# }
 
 # configue () {
 #     emconfigue configue "$@"

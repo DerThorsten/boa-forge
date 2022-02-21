@@ -10,7 +10,7 @@ package:
 
 source:
   git_url: https://github.com/python/cpython
-  git_rev: main
+  git_rev: 12a2e41e8a276ec3a68f3e5f94b02752185c66fb
 
 
 # - url: https://github.com/python/cpython/archive/refs/tags/v{{ version }}.tar.gz
@@ -26,7 +26,7 @@ requirements:
   build:
     - sel(unix):          make           
     - sel(emscripten):    mypython
-    - sel(emscripten):    binutils
+    # - sel(emscripten):    binutils
   # host:
   #   - sel(not win and not emscripten): readline
   #   - sel(not win and not emscripten): ncurses 

@@ -6,15 +6,15 @@ if [[ $target_platform == "emscripten-32" ]]; then
     echo "EMSCRIPTEN!"
     mkdir -p builddir/emscripten-browser
     pushd builddir/emscripten-browser
-    export CONFIG_SITE=../../Tools/wasm/config.site-wasm32-emscripten 
 
 
-    embuilder build zlib bzip2
+    embuilder build zlib
 
 
     # mkdir -p usr/local
 
 
+    CONFIG_SITE=../../Tools/wasm/config.site-wasm32-emscripten \
     emconfigure ../../configure -C \
         --host=wasm32-unknown-emscripten \
         --build=$(../../config.guess) \
@@ -27,10 +27,12 @@ if [[ $target_platform == "emscripten-32" ]]; then
 
 
     make -j$(nproc) || true
-    emmake make install
+    make install
+    node python.js
     echo "LS"
     ls
-    # cp -a $(pwd)/python $PREFIX/bin/
+    mkdir -p $PREFIX/bin/
+    cp -t $PREFIX/bin/ python.* 
     popd
 
 else
