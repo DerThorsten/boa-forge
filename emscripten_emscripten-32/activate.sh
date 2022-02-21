@@ -15,6 +15,6 @@ make () {
     emmake make "$@"
 }
 
-configue () {
-    emconfigue configue "$@"
-}
+# configue () {
+#     emconfigue configue "$@"
+# }
