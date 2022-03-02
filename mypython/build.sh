@@ -2,37 +2,62 @@
 
 
 
+# Following is needed for building extensions like zlib
+CPPFLAGS=${CPPFLAGS}"-I${PREFIX}/include"
+
+export LDFLAGS="-L ${PREFIX}/lib"
+# -lffi -lsqlite3 -lbz2"
+export CPPFLAGS CFLAGS CXXFLAGS LDFLAGS
+
 if [[ $target_platform == "emscripten-32" ]]; then
-    echo "EMSCRIPTEN!"
+
+
+    # use our own config site
+    cp ${RECIPE_DIR}/conda.config.site-wasm32-emscripten conda.config.site-wasm32-emscripten
+
+    # create build dir
     mkdir -p builddir/emscripten-browser
     pushd builddir/emscripten-browser
 
-
+    # make zlib available (todo check if this makes sense in the conda context)
     embuilder build zlib
 
 
-    # mkdir -p usr/local
-
-
-    CONFIG_SITE=../../Tools/wasm/config.site-wasm32-emscripten \
+    # CONFIG_SITE=../../conda.config.site-wasm32-emscripten  \
+    # CONFIG_SITE=../../Tools/wasm/config.site-wasm32-emscripten \
+    CONFIG_SITE=../../conda.config.site-wasm32-emscripten READELF=true \
     emconfigure ../../configure -C \
         --host=wasm32-unknown-emscripten \
+        --without-pymalloc \
+        --disable-shared \
+        --disable-ipv6 \
         --build=$(../../config.guess) \
         --with-emscripten-target=browser \
         --with-build-python=python3.11 \
-        --prefix=$PREFIX 
+        --prefix=${PREFIX}
+
+        # CPPFLAGS=${CPPFLAGS}\
+        # LDFLAGS=${LDFLAGS}\
+        # --enable-optimizations \
         
-        # --exec_prefix=$(pwd)/usr/local \
-    #     --prefix=$(pwd)/usr/local
+    # build dir is the current dir
+    # cp ${RECIPE_DIR}/from_pyodide/Setup.local Modules/
+    # cat ${RECIPE_DIR}/from_pyodide/pyconfig.undefs.h >> pyconfig.h
 
+    sed -i -e 's/libinstall:.*/libinstall:/' Makefile; 
 
-    make -j$(nproc) || true
-    make install
-    node python.js
-    echo "LS"
-    ls
+    make CROSS_COMPILE=yes  -j$(nproc) || true
+    make CROSS_COMPILE=yes  install || true
+    # make CROSS_COMPILE=yes -j$(nproc) || true
+    # make CROSS_COMPILE=yes install
+
     mkdir -p $PREFIX/bin/
+    mkdir -p $PREFIX/lib/python_internal
     cp -t $PREFIX/bin/ python.* 
+    cp -t $PREFIX/lib/python_internal Modules/_decimal/libmpdec/libmpdec.a
+    cp -t $PREFIX/lib/python_internal Modules/expat/libexpat.a
+
+
     popd
 
 else

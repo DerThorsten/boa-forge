@@ -1,7 +1,10 @@
-from make import Make
+from bitfurnace.make import Make
+from bitfurnace.cmake import CMake
+from bitfurnace.util import variables
 
 import shutil
 import glob
+import os
 from pathlib import Path
 
 def install(from_path, to_path, follow_symlinks=False):
@@ -23,8 +26,8 @@ class UnixRecipe(Make):
 
     def install(self):
         run(['make', 'install'] + self.get_install_args())
-        if not features.static:
-            if target_platform.startswith('linux'):
+        if not features.static and not target_platform.startswith('emscripten'):
+            if target_platform.startswith('linux') or target_platform.startswith('emscripten'):
                 run(['make', '-f', 'Makefile-libbz2_so'] + self.get_install_args())
                 install(f'libbz2.so.{pkg_version}', prefix / 'lib')
                 Path(prefix / 'lib' / 'libbz2.so').symlink_to(prefix / 'lib' / f'libbz2.so.{pkg_version}')
@@ -44,7 +47,15 @@ class UnixRecipe(Make):
         self.install_args = [f'CFLAGS={cflags}']
 
 
+
+class CMakeRecipe(CMake):
+    # cmakelists_dir = variables.recipe_dir
+    pass
+
 if target_platform.startswith('win'):
     pass
+elif target_platform.startswith('emscripten'):
+    shutil.copy2(os.path.join( variables.recipe_dir, "CMakeLists.txt"), variables.src_dir)
+    Recipe = CMakeRecipe
 else:
     Recipe = UnixRecipe

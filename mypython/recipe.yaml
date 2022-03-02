@@ -1,5 +1,5 @@
 context:
-  version: 3.11.0a4
+  version: 3.11.1
 
 package:
   name: mypython
@@ -11,14 +11,24 @@ package:
 source:
   git_url: https://github.com/python/cpython
   git_rev: 12a2e41e8a276ec3a68f3e5f94b02752185c66fb
-
+  patches:
+    # - sel(emscripten): patches/0001-call-trampolines-to-handle-fpcast-troubles.patch
+    # - sel(emscripten): patches/0002-dont-test-undecodable-filenames.patch
+    - sel(emscripten): patches/0007-testing.patch
+    # - sel(emscripten): patches/0008-drop-pwd-built-in-module.patch
+    - sel(emscripten): patches/ctypes-dont-deref-function-pointer.patch
+    - sel(emscripten): patches/remove-duplicate-symbols-from-cfield.c.patch
+    # - sel(emscripten): patches/xfail-core-ctypes-tests-that-don-t-work.patch
+    # - sel(emscripten): 0005-add-emscripten-host.patch
+    # - sel(emscripten): 0006-fix-Py_Sigset_Converter.patch
+    # - sel(emscripten): keyboard-interrupt.patch
 
 # - url: https://github.com/python/cpython/archive/refs/tags/v{{ version }}.tar.gz
 
 build:
   number: 0
-  detect_binary_files_with_prefix: true
-  # run_exports:
+  # detect_binary_files_with_prefix: true
+  # # run_exports:
   #   - "{{ pin_subpackage('python', max_pin='x.x') }}"
 
     
@@ -27,14 +37,19 @@ requirements:
     - sel(unix):          make           
     - sel(emscripten):    mypython
     # - sel(emscripten):    binutils
-  # host:
-  #   - sel(not win and not emscripten): readline
-  #   - sel(not win and not emscripten): ncurses 
-  # run:
-  #   - sel(not win and not emscripten): readline
-  #   - sel(not win and not emscripten): ncurses 
-
-
+  host:
+    - bzip2
+    - zlib
+    - libffi
+    - sqlite
+    - sel(emscripten):    mpdecimal
+  run:
+    - bzip2
+    - zlib
+    - libffi
+    - sqlite
+    - sel(emscripten):    mpdecimal
+    
 about:
   home: todo
   summary: todo

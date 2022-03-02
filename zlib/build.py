@@ -10,7 +10,10 @@
 # 		self.cxxflags += ['-fPIC']
 
 from bitfurnace.cmake import CMake
+from bitfurnace.util import variables
 import pathlib
+import shutil
+import os
 
 def safe_unlink(p):
 	assert(prefix in p.parents)
@@ -31,7 +34,7 @@ class Recipe(CMake):
 			(library_bin / "zlib.dll").unlink()
 		else:
 			print(features)
-			if not features.static:
+			if not features.static and not variables.target_platform.startswith("emscripten"):
 				# delete the .a library
 				rm(prefix / "lib" / "libz.a")
 			else:
@@ -45,3 +48,8 @@ class Recipe(CMake):
 		self.cflags += ['-fPIC']
 		self.cxxflags += ['-fPIC']
 
+
+
+if variables.target_platform.startswith("emscripten"):
+	shutil.copy2(os.path.join(variables.recipe_dir, "CMakeLists.txt"),
+		variables.src_dir)
